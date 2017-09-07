@@ -10,11 +10,13 @@ import io.reactivex.schedulers.Schedulers
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var textView: TextView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        var textView : TextView = findViewById(R.id.textview) as TextView
+        textView = findViewById(R.id.textview) as TextView
 
         val client = SlackClient()
         client.history()
