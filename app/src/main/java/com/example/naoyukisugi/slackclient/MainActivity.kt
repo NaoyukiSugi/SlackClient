@@ -39,11 +39,12 @@ class MainActivity : AppCompatActivity() {
                 }
 
         send_button.setOnClickListener {
-            //TODO 送信処理を書く
-            client.postMessage("piyopiyo")
+            client.postMessage(editText.text.toString())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(){}
+                    .subscribe{}
+
+            editText.editableText.clear()
         }
 
     }
