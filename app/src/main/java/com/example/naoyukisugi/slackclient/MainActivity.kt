@@ -23,7 +23,7 @@ import okhttp3.RequestBody
 import okhttp3.internal.Util
 import java.io.File
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity()  {
     private val REQUEST_CHOOSER: Int = 1000
     lateinit var m_uri: Uri
 
@@ -47,6 +47,8 @@ class MainActivity : AppCompatActivity() {
 
         val media_button: Button = findViewById(R.id.media_button) as Button
 
+        llm.reverseLayout = true
+//        llm.stackFromEnd = true
 
         //チャンネル内のメッセージ一覧表示
         client.history()
@@ -139,7 +141,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-
     private fun showGallery() {
         val intentGallery: Intent
         intentGallery = Intent(Intent.ACTION_OPEN_DOCUMENT)
@@ -147,5 +148,6 @@ class MainActivity : AppCompatActivity() {
         intentGallery.setType("image/jpeg")
         startActivityForResult(intentGallery, REQUEST_CHOOSER)
     }
+
 
 }

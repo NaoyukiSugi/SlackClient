@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 
-class MessageRecycleViewAdapter(private val list: List<Message>): RecyclerView.Adapter<MessageViewHolder>() {
+class MessageRecycleViewAdapter(private val list: List<Message>) : RecyclerView.Adapter<MessageViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageViewHolder {
         Log.d("onCreateViewHolder", "piyo")
@@ -20,6 +20,6 @@ class MessageRecycleViewAdapter(private val list: List<Message>): RecyclerView.A
 
     }
 
-    override fun getItemCount(): Int = list.size
+        override fun getItemCount(): Int = list.size
 
 }
