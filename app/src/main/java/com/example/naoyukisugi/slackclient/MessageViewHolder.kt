@@ -7,9 +7,10 @@ import android.widget.TextView
 
 
 class MessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    lateinit var textView : TextView
+    var textView: TextView
 
-    fun MessageViewHolder(itemView: View) {
-        textView = itemView.findViewById(R.id.textview)
+    init {
+        textView = itemView.findViewById(R.id.textView)
     }
+
 }
