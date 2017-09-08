@@ -1,19 +1,26 @@
 package com.example.naoyukisugi.slackclient
 
-import android.net.Uri
+import com.facebook.stetho.okhttp3.StethoInterceptor
 import io.reactivex.Observable
 import okhttp3.MultipartBody
-import okhttp3.ResponseBody
+import okhttp3.OkHttpClient
+import okhttp3.RequestBody
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
-import java.util.*
 
 class SlackClient {
 
+    fun createOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+                .addNetworkInterceptor(StethoInterceptor())
+                .build()
+    }
+
     fun history(): Observable<ChannelHistory> {
         val retrofit = Retrofit.Builder()
+                .client(createOkHttpClient())
                 .baseUrl("https://slack.com/api/")
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
@@ -39,18 +46,22 @@ class SlackClient {
                 username = "Android")
     }
 
-    fun postImage(file: MultipartBody.Part): Observable<ResponseBody> {
+    fun postImage(file: MultipartBody.Part): Observable<PostImage> {
         val retrofit = Retrofit.Builder()
+                .client(createOkHttpClient())
                 .baseUrl("https://slack.com/api/")
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
         val api = retrofit.create(SlackApi::class.java)
+
+        val token = RequestBody.create(MultipartBody.FORM, "xoxp-235445599280-237071487205-238240391350-562207ba27f3caea4162c75ff6dc5708")
+        val channel = RequestBody.create(MultipartBody.FORM, "C6Y0L4SRH")
+
         return api.postImage(
-                token = "xoxp-235445599280-237071487205-238240391350-562207ba27f3caea4162c75ff6dc5708",
-                channel = "C6Y0L4SRH",
-                file = file,
-                filename = "androider")
+                token = token,
+                channels = channel,
+                file = file)
     }
 
     interface SlackApi {
@@ -66,17 +77,13 @@ class SlackClient {
                         @Field("as_user") as_user: String = "false",
                         @Field("username") username: String): io.reactivex.Observable<Message>
 
-        @FormUrlEncoded
+        @Multipart
         @POST("files.upload")
-        fun postImage(@Field("token") token: String,
-                      @Field("channel") channel: String,
-                      @Field("file") file: MultipartBody.Part,
-                      @Field("filename") filename: String) : io.reactivex.Observable<ResponseBody>
-
+        fun postImage(@Part("token") token: RequestBody,
+                      @Part("channels") channels: RequestBody,
+                      @Part file: MultipartBody.Part) : io.reactivex.Observable<PostImage>
 
     }
-
-
 
 
 }

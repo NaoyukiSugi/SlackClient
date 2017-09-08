@@ -1,13 +1,18 @@
 package com.example.naoyukisugi.slackclient
 
 import android.app.Activity
+import android.content.ContentUris
 import android.content.ContentValues
+import android.content.Context
 import android.content.Intent
+import android.database.Cursor
 import android.media.MediaScannerConnection
 import android.net.Uri
+import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
+import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -15,10 +20,13 @@ import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import com.facebook.stetho.Stetho
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import okhttp3.Interceptor
 import okhttp3.MediaType
 import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import okhttp3.internal.Util
 import java.io.File
@@ -32,6 +40,11 @@ class MainActivity : AppCompatActivity()  {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        Stetho.initialize(Stetho.newInitializerBuilder(application)
+                .enableDumpapp(Stetho.defaultDumperPluginsProvider(application))
+                .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(application))
+                .build())
 
         val rv: RecyclerView = findViewById(R.id.messageRecycleView) as RecyclerView
 
@@ -73,32 +86,36 @@ class MainActivity : AppCompatActivity()  {
 
         send_image_button.setOnClickListener {
 
-            var file = File(resultUri.path)
-//            var file = File(Environment.DIRECTORY_DOWNLOADS + "/" + "images.jpg")
-//            var file = File(Environment.DIRECTORY_DOCUMENTS + "/" + "images.jpg")
+            val cursor = contentResolver.query(resultUri, arrayOf(MediaStore.Images.Media.DATA), null, null, null)
+            //TODO ファイルのパスを直書きしてるので、選べるようにする
+            cursor?.let {
+//                var path: String? = null
+//                if (cursor.moveToFirst()) {
+//                    path = cursor.getString(0)
+//                }
+//                cursor.close()
+//                var file: File? = null
+//                path?.let {
+//                    file = File(path)
+//                }
+                val file = File("/mnt/sdcard/Download/images.jpg")
 
-//            val requestFile: RequestBody = RequestBody.create(
-//                    MediaType.parse(contentResolver.getType(resultUri)),
-//                    file
-//            )
+                val requestFile: RequestBody = RequestBody.create(
+                        MediaType.parse(contentResolver.getType(resultUri)),
+                        file
+                )
 
-            val requestFile: RequestBody = RequestBody.create(
-                    MediaType.parse("multipart/form-data"), file
-            )
+                var body: MultipartBody.Part = MultipartBody.Part.createFormData("file",
+                        file!!.name , requestFile)
 
-            var body: MultipartBody.Part = MultipartBody.Part.createFormData("file",
-                    file.getName(), requestFile)
+                client.postImage(body)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe{
+                            Log.d("postImage", it.isSuccess.toString())
 
-//             var body: MultipartBody.Part = MultipartBody.Part.createFormData("file",
-//                    "images.jpg", requestFile)
-
-
-            client.postImage(body)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe{
-                        Log.d("test", resultUri.path)
-                    }
+                        }
+            }
         }
 
 
@@ -128,6 +145,7 @@ class MainActivity : AppCompatActivity()  {
                 return
             }
 
+            //選んだ画像のUriを取得
             resultUri = (if (data != null) data.data else m_uri) ?: return
             MediaScannerConnection.scanFile(
                     this,
@@ -146,8 +164,8 @@ class MainActivity : AppCompatActivity()  {
         intentGallery = Intent(Intent.ACTION_OPEN_DOCUMENT)
         intentGallery.addCategory(Intent.CATEGORY_OPENABLE)
         intentGallery.setType("image/jpeg")
+//        intentGallery.setType("image/*")
         startActivityForResult(intentGallery, REQUEST_CHOOSER)
     }
-
 
 }
