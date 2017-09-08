@@ -6,8 +6,11 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
+import android.graphics.Bitmap
+import android.media.Image
 import android.media.MediaScannerConnection
 import android.net.Uri
+import android.os.AsyncTask
 import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -17,18 +20,19 @@ import android.provider.MediaStore
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import com.bumptech.glide.Glide
 import com.facebook.stetho.Stetho
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import okhttp3.Interceptor
 import okhttp3.MediaType
 import okhttp3.MultipartBody
-import okhttp3.OkHttpClient
 import okhttp3.RequestBody
-import okhttp3.internal.Util
 import java.io.File
 
 class MainActivity : AppCompatActivity()  {
@@ -84,6 +88,14 @@ class MainActivity : AppCompatActivity()  {
             editText.editableText.clear()
         }
 
+        client.userList()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+//                    it.profile
+
+                }
+
         send_image_button.setOnClickListener {
 
             val cursor = contentResolver.query(resultUri, arrayOf(MediaStore.Images.Media.DATA), null, null, null)
@@ -128,12 +140,6 @@ class MainActivity : AppCompatActivity()  {
 
         }
 
-//        var photoName: String = System.currentTimeMillis().toString() + ".jpg"
-//        var contentValues: ContentValues = ContentValues()
-//        contentValues.put(MediaStore.Images.Media.TITLE, photoName)
-//        m_uri = getContentResolver()
-//                .insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
-
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -159,13 +165,13 @@ class MainActivity : AppCompatActivity()  {
 
     }
 
-    private fun showGallery() {
-        val intentGallery: Intent
-        intentGallery = Intent(Intent.ACTION_OPEN_DOCUMENT)
-        intentGallery.addCategory(Intent.CATEGORY_OPENABLE)
-        intentGallery.setType("image/jpeg")
-//        intentGallery.setType("image/*")
-        startActivityForResult(intentGallery, REQUEST_CHOOSER)
-    }
+
+//    private fun showGallery() {
+//        val intentGallery: Intent
+//        intentGallery = Intent(Intent.ACTION_OPEN_DOCUMENT)
+//        intentGallery.addCategory(Intent.CATEGORY_OPENABLE)
+//        intentGallery.setType("image/jpeg")
+//        startActivityForResult(intentGallery, REQUEST_CHOOSER)
+//    }
 
 }

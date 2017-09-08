@@ -64,6 +64,19 @@ class SlackClient {
                 file = file)
     }
 
+    fun userList(): Observable<User> {
+        val retrofit = Retrofit.Builder()
+                .client(createOkHttpClient())
+                .baseUrl("https://slack.com/api/")
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+        val api = retrofit.create(SlackApi::class.java)
+        return api.userList(
+                token = "xoxp-235445599280-237071487205-238240391350-562207ba27f3caea4162c75ff6dc5708")
+
+    }
+
     interface SlackApi {
         @FormUrlEncoded
         @POST("channels.history")
@@ -81,8 +94,11 @@ class SlackClient {
         @POST("files.upload")
         fun postImage(@Part("token") token: RequestBody,
                       @Part("channels") channels: RequestBody,
-                      @Part file: MultipartBody.Part) : io.reactivex.Observable<PostImage>
+                      @Part file: MultipartBody.Part): io.reactivex.Observable<PostImage>
 
+        @FormUrlEncoded
+        @POST("users.list")
+        fun userList(@Field("token") token: String): io.reactivex.Observable<User>
     }
 
 
